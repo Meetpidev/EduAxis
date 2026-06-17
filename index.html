@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html class="light scroll-smooth" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EduAxis | Next-Gen School Management</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+    
+    /* Material Icons */
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    
+    /* Animations */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+    }
+    
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    
+    .hero-stagger { opacity: 0; animation: fadeInUp 0.8s ease-out forwards; }
+    .hero-stagger-1 { animation-delay: 0.1s; }
+    .hero-stagger-2 { animation-delay: 0.3s; }
+    .hero-stagger-3 { animation-delay: 0.5s; }
+    .hero-stagger-4 { animation-delay: 0.7s; }
+    
+    .float-animation { animation: float 6s ease-in-out infinite; }
+    
+    .shimmer-btn {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .shimmer-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: shimmer 3s infinite;
+    }
+    
+    .nav-link {
+      position: relative;
+      transition: color 0.3s ease;
+    }
+    
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: -4px;
+      left: 0;
+      background-color: currentColor;
+      transition: width 0.3s ease;
+    }
+    
+    .nav-link:hover::after { width: 100%; }
+    
+    /* Reveal Animation */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    /* Modal Styles */
+    #contact-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    
+    #contact-modal.open {
+      display: flex;
+    }
+    
+    #contact-modal-box {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      position: relative;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    #contact-modal-box input,
+    #contact-modal-box select,
+    #contact-modal-box textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid #e0e3e5;
+      border-radius: 8px;
+      font-family: Inter, sans-serif;
+      font-size: 14px;
+      color: #191c1e;
+      background: #f7f8f9;
+      outline: none;
+      transition: all 0.2s;
+      box-sizing: border-box;
+    }
+    
+    #contact-modal-box input:focus,
+    #contact-modal-box select:focus,
+    #contact-modal-box textarea:focus {
+      border-color: #000;
+      box-shadow: 0 0 0 3px rgba(0,0,0,0.08);
+      background: white;
+    }
+    
+    #contact-modal-box label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #191c1e;
+      margin-bottom: 6px;
+    }
+    
+    #contact-modal-box textarea {
+      resize: vertical;
+      min-height: 110px;
+      font-family: Inter, sans-serif;
+    }
+    
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #000;
+      color: white;
+      padding: 12px 28px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 500;
+      opacity: 0;
+      transition: opacity 0.4s;
+      pointer-events: none;
+      z-index: 99999;
+      max-width: 90%;
+      text-align: center;
+    }
+    
+    #toast.show { opacity: 1; }
+    #toast.error { background: #ba1a1a; }
+    
+    /* Mobile Menu */
+    #mobile-menu {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      background: white;
+      border-bottom: 1px solid #e0e3e5;
+    }
+    
+    #mobile-menu.open {
+      max-height: 300px;
+    }
+    
+    .mobile-nav-link {
+      display: block;
+      padding: 12px 0;
+      font-size: 14px;
+      color: #45464d;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    
+    .mobile-nav-link:hover { color: #000; }
+    
+    /* Bento Grid */
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+    
+    @media (max-width: 640px) {
+      .bento-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+    }
+    
+    /* Feature Card */
+    .feature-card {
+      background: white;
+      border: 1px solid #e0e3e5;
+      padding: 24px;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+    
+    .feature-card:hover {
+      box-shadow: 0 8px 30px rgba(15,23,42,0.12);
+      transform: translateY(-4px);
+    }
+    
+    /* Responsive Text */
+    @media (max-width: 640px) {
+      .display-lg { font-size: 28px !important; line-height: 36px !important; }
+      .headline-md { font-size: 20px !important; line-height: 28px !important; }
+      .body-lg { font-size: 16px !important; }
+    }
+  </style>
+</head>
+<body class="bg-white text-gray-900">
+  
+  <!-- Contact Modal -->
+      
+  <div id="contact-modal" class="overflow-hidden"  role="dialog" aria-modal="true" aria-labelledby="modal-title" style="overflow-y:hidden;">
+    <div id="contact-modal-box" class="overflow-hidden">
+      <button onclick="closeModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;cursor:pointer;color:#999;font-size:24px;" aria-label="Close">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+      
+      <h2 id="modal-title" style="font-size:22px;font-weight:700;color:#000;margin-bottom:8px;">Contact Us</h2>
+      <p style="font-size:14px;color:#666;margin-bottom:24px;">We'll get back to you within 24 hours.</p>
+      
+      <form id="contact-form" onsubmit="sendContact(event)" style="overflow-y:hidden;" >
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1px;">
+          <div>
+            <label for="c-name">Full Name</label>
+            <input id="c-name" type="text" placeholder="Your name" required/>
+          </div>
+          <div>
+            <label for="c-email">Email</label>
+            <input id="c-email" type="email" placeholder="your@email.com" required/>
+          </div>
+        </div>
+        
+        <div style="margin-bottom:12px;">
+          <label for="c-subject">Subject</label>
+          <select id="c-subject">
+            <option value="Admissions Inquiry">Admissions Inquiry</option>
+            <option value="Pricing & Plans">Pricing & Plans</option>
+            <option value="Technical Support">Technical Support</option>
+            <option value="Partnership">Partnership</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        
+        <div style="margin-bottom:24px;">
+          <label for="c-message">Message</label>
+          <textarea id="c-message" placeholder="Your message..." required></textarea>
+        </div>
+        
+        <button id="send-btn" type="submit" style="display:inline-flex;align-items:center;gap:8px;width:100%;justify-content:center;background:#000;color:white;border:none;padding:14px;border-radius:8px;font-weight:600;cursor:pointer;transition:opacity 0.2s;">
+          Send Message <span class="material-symbols-outlined" style="font-size:18px;">send</span>
+        </button>
+      </form>
+    </div>
+  </div>
+  
+  <div id="toast"></div>
+  
+  <!-- Navbar -->
+  <header class="fixed top-0 w-full z-50 bg-white border-b border-gray-200" id="navbar">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex justify-between items-center">
+      <!-- Logo -->
+      <div class="flex items-center gap-2">
+        <div style="font-size:24px;font-weight:700;color:#000;">EduAxis</div>
+      </div>
+      
+      <!-- Desktop Nav -->
+      <nav class="hidden md:flex items-center gap-8">
+        <a href="#features" class="nav-link text-sm font-medium text-gray-600 hover:text-black">Features</a>
+        <a href="#benefits" class="nav-link text-sm font-medium text-gray-600 hover:text-black">Benefits</a>
+      </nav>
+      
+      <!-- Desktop CTA -->
+      <div class="hidden md:flex items-center gap-4">
+        <button onclick="openModal()" class="text-sm font-medium text-gray-600 hover:text-black bg-transparent border-none cursor-pointer">Contact</button>
+        <a href="#waitlist" class="shimmer-btn bg-black text-white text-sm font-medium px-6 py-2 rounded-full hover:opacity-90 transition-all">Join Waitlist</a>
+      </div>
+      
+      <!-- Mobile Menu Button -->
+      <button id="menu-btn" onclick="toggleMenu()" class="md:hidden bg-transparent border-none cursor-pointer text-xl">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+    </div>
+    
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="md:hidden px-4">
+      <a href="#features" class="mobile-nav-link">Features</a>
+      <a href="#benefits" class="mobile-nav-link">Benefits</a>
+      <button onclick="openModal()" class="mobile-nav-link">Contact Us</button>
+      <a href="#waitlist" class="mobile-nav-link">Join Waitlist</a>
+    </div>
+  </header>
+  
+  <main class="pt-0 translate-y-[-2rem]" style="scroll-padding-top:64px;">
+    <!-- Hero Section -->
+    <section class="w-full py-12 sm:py-20 md:py-32 px-4 sm:px-6 bg-white">
+      <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center">
+        <!-- Left Content -->
+        <div>
+          <div class="hero-stagger hero-stagger-1 inline-block px-4 py-2 rounded-full bg-teal-100 text-teal-700 text-xs font-semibold uppercase mb-6">☁️ Cloud-Native Education</div>
+          
+          <h1 class="hero-stagger hero-stagger-2 text-4xl sm:text-5xl md:text-6xl font-bold text-black mb-6 leading-tight">Next-Gen School Management</h1>
+          
+          <p class="hero-stagger hero-stagger-3 text-lg sm:text-xl text-gray-700 mb-6">Manage Your School & Tuition Classes from One Powerful Platform</p>
+          
+          <p class="hero-stagger hero-stagger-4 text-base sm:text-lg text-gray-600 mb-10">Automate admissions, student records, attendance, fees, homework, communication, and performance tracking with a single cloud-based solution.</p>
+          
+          <div class="hero-stagger hero-stagger-4 flex flex-col sm:flex-row gap-4">
+            <a href="#waitlist" class="shimmer-btn inline-flex items-center justify-center bg-black text-white font-semibold px-8 py-4 rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all text-center">Join Waitlist</a>
+            <a href="#features" class="inline-flex items-center justify-center bg-white border-2 border-gray-300 text-black font-semibold px-8 py-4 rounded-lg hover:bg-gray-50 hover:scale-105 transition-all text-center">Explore Features</a>
+          </div>
+        </div>
+        
+        <!-- Right Image -->
+        <div class="relative hero-stagger hero-stagger-2 hidden md:block">
+          <div class="float-animation bg-white p-4 rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
+            <img 
+              src="./image.png" 
+              alt="Modern classroom with digital interface"
+              class="rounded-xl w-full h-auto object-cover"
+              style="aspect-ratio: 3/2;"
+            />
+          </div>
+          <div class="absolute -top-8 -right-8 w-32 h-32 bg-blue-200 rounded-full opacity-20 blur-3xl"></div>
+          <div class="absolute -bottom-12 -left-12 w-48 h-48 bg-purple-200 rounded-full opacity-20 blur-3xl"></div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Mobile Hero Image -->
+    <section class="md:hidden w-full px-4 sm:px-6 pb-12">
+      <div class="max-w-6xl mx-auto">
+        <div class="float-animation bg-white p-4 rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+          <img 
+           src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=600&h=400&fit=crop"
+            alt="Modern classroom with digital interface"
+            class="rounded-xl w-full h-auto object-cover"
+            style="aspect-ratio: 3/2;"
+            onerror="this.src='https://picsum.photos/id/201/800/620';"
+          />
+        </div>
+      </div>
+    </section>
+    
+    <!-- Features Section -->
+    <section class="w-full py-16 sm:py-24 px-4 sm:px-6 bg-gray-50" id="features">
+      <div class="max-w-6xl mx-auto">
+        <div class="reveal text-center mb-12 md:mb-20">
+          <h2 class="display-lg text-3xl sm:text-4xl md:text-5xl font-bold text-black mb-4">Comprehensive Management Tools</h2>
+          <p class="headline-md text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">Everything you need to run your institution efficiently in one place.</p>
+        </div>
+        
+        <div class="bento-grid">
+          <div class="reveal feature-card">
+            <div style="width:48px;height:48px;background:#e0e7ff;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+              <span class="material-symbols-outlined" style="color:#4f46e5;font-size:28px;">badge</span>
+            </div>
+            <h3 class="text-xl font-bold text-black mb-3">Student Management</h3>
+            <p class="text-gray-600">360° view of student academic and behavioral records in a single searchable profile.</p>
+          </div>
+          
+          <div class="reveal feature-card">
+            <div style="width:48px;height:48px;background:#ccfbf1;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+              <span class="material-symbols-outlined" style="color:#0d9488;font-size:28px;">how_to_reg</span>
+            </div>
+            <h3 class="text-xl font-bold text-black mb-3">Attendance</h3>
+            <p class="text-gray-600">Automated biometric or manual entry with instant alerts sent to parents via push notification.</p>
+          </div>
+          
+          <div class="reveal feature-card">
+            <div style="width:48px;height:48px;background:#fce7f3;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+              <span class="material-symbols-outlined" style="color:#ec4899;font-size:28px;">payments</span>
+            </div>
+            <h3 class="text-xl font-bold text-black mb-3">Fees & Payments</h3>
+            <p class="text-gray-600">Secure online fee collection with automated digital receipts and pending fee reminders.</p>
+          </div>
+          
+          <div class="reveal feature-card">
+            <div style="width:48px;height:48px;background:#fef3c7;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+              <span class="material-symbols-outlined" style="color:#f59e0b;font-size:28px;">edit_document</span>
+            </div>
+            <h3 class="text-xl font-bold text-black mb-3">Homework</h3>
+            <p class="text-gray-600">Digital assignment submission, teacher feedback loops, and automated grading for MCQ tasks.</p>
+          </div>
+          
+          <div class="reveal feature-card">
+            <div style="width:48px;height:48px;background:#dbeafe;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+              <span class="material-symbols-outlined" style="color:#3b82f6;font-size:28px;">workspace_premium</span>
+            </div>
+            <h3 class="text-xl font-bold text-black mb-3">Exams</h3>
+            <p class="text-gray-600">Easy report card generation, class ranking systems, and comparative analytics over semesters.</p>
+          </div>
+          
+          <div class="reveal feature-card">
+            <div style="width:48px;height:48px;background:#d1d5db;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+              <span class="material-symbols-outlined" style="color:#6b7280;font-size:28px;">campaign</span>
+            </div>
+            <h3 class="text-xl font-bold text-black mb-3">Communication</h3>
+            <p class="text-gray-600">Mass SMS, Email, and Push notifications delivered in one click to target groups or individuals.</p>
+          </div>
+          
+          <div class="reveal feature-card">
+            <div style="width:48px;height:48px;background:#f3e8ff;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+              <span class="material-symbols-outlined" style="color:#a855f7;font-size:28px;">monitoring</span>
+            </div>
+            <h3 class="text-xl font-bold text-black mb-3">Reporting</h3>
+            <p class="text-gray-600">Real-time data insights and administrative dashboards for tracking overall school growth.</p>
+          </div>
+          
+          <div class="reveal feature-card">
+            <div style="width:48px;height:48px;background:#fecaca;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+              <span class="material-symbols-outlined" style="color:#dc2626;font-size:28px;">directions_bus</span>
+            </div>
+            <h3 class="text-xl font-bold text-black mb-3">Transport</h3>
+            <p class="text-gray-600">Live GPS tracking for school buses, route optimization, and student check-in logs.</p>
+          </div>
+          
+          <div class="reveal feature-card">
+            <div style="width:48px;height:48px;background:#c7d2fe;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+              <span class="material-symbols-outlined" style="color:#4f46e5;font-size:28px;">work_history</span>
+            </div>
+            <h3 class="text-xl font-bold text-black mb-3">HR & Payroll</h3>
+            <p class="text-gray-600">Staff attendance management, digital salary slips, and leave approval workflows.</p>
+          </div>
+          
+          <div class="reveal feature-card">
+            <div style="width:48px;height:48px;background:#a5f3fc;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+              <span class="material-symbols-outlined" style="color:#06b6d4;font-size:28px;">calendar_month</span>
+            </div>
+            <h3 class="text-xl font-bold text-black mb-3">Timetable Maker</h3>
+            <p class="text-gray-600">Drag-and-drop schedule builder with automated conflict detection. Easily assign and sync timetables.</p>
+          </div>
+          
+          <div class="reveal feature-card">
+            <div style="width:48px;height:48px;background:#86efac;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+              <span class="material-symbols-outlined" style="color:#22c55e;font-size:28px;">trending_up</span>
+            </div>
+            <h3 class="text-xl font-bold text-black mb-3">Progress Reports</h3>
+            <p class="text-gray-600">Generate detailed academic and behavioral progress reports with automated data visualization for parents.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Benefits Section -->
+    <section class="w-full py-16 sm:py-24 px-4 sm:px-6 bg-white" id="benefits">
+      <div class="max-w-6xl mx-auto">
+        <div class="reveal text-center mb-12 md:mb-20">
+          <h2 class="display-lg text-3xl sm:text-4xl md:text-5xl font-bold text-black mb-4">Why Choose EduAxis?</h2>
+          <p class="headline-md text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">We provide the foundation for educational excellence with industry-leading technology.</p>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 md:gap-12">
+          <div class="reveal text-center">
+            <div style="width:64px;height:64px;background:#e0e7ff;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;box-shadow:0 4px 12px rgba(79,70,229,0.2);">
+              <span class="material-symbols-outlined" style="color:#4f46e5;font-size:36px;">cloud_done</span>
+            </div>
+            <h3 class="text-xl font-bold text-black mb-4">Cloud-Native Reliability</h3>
+            <p class="text-gray-600">Enjoy 99.9% uptime with our global infrastructure. Access your school data anytime, anywhere.</p>
+          </div>
+          
+          <div class="reveal text-center">
+            <div style="width:64px;height:64px;background:#fecaca;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;box-shadow:0 4px 12px rgba(220,38,38,0.2);">
+              <span class="material-symbols-outlined" style="color:#dc2626;font-size:36px;">security</span>
+            </div>
+            <h3 class="text-xl font-bold text-black mb-4">Enhanced Security</h3>
+            <p class="text-gray-600">Enterprise-grade encryption for all records. Regular backups and compliance with global standards.</p>
+          </div>
+          
+          <div class="reveal text-center">
+            <div style="width:64px;height:64px;background:#86efac;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;box-shadow:0 4px 12px rgba(34,197,94,0.2);">
+              <span class="material-symbols-outlined" style="color:#22c55e;font-size:36px;">hub</span>
+            </div>
+            <h3 class="text-xl font-bold text-black mb-4">Seamless Integration</h3>
+            <p class="text-gray-600">Connect easily with your existing tools. Our platform bridges the gap between academics and finance.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Onboarding Section -->
+    <section class="w-full py-16 sm:py-24 px-4 sm:px-6 bg-gray-50" id="onboarding">
+      <div class="max-w-6xl mx-auto">
+        <div class="reveal text-center mb-12 md:mb-20">
+          <p class="text-sm font-semibold uppercase tracking-widest text-blue-600 mb-3">Process</p>
+          <h2 class="display-lg text-3xl sm:text-4xl md:text-5xl font-bold text-black mb-4">Streamlined Onboarding</h2>
+          <p class="headline-md text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">Getting your institution up and running is simpler than you think.</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+          <div class="reveal bg-white p-8 rounded-2xl border border-gray-200 text-center hover:border-blue-500 hover:shadow-lg transition-all">
+            <div style="width:64px;height:64px;background:#e0e7ff;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;">
+              <span class="material-symbols-outlined" style="color:#4f46e5;font-size:36px;">settings</span>
+            </div>
+            <h3 class="text-xl font-bold text-black mb-4">Initial Setup</h3>
+            <p class="text-gray-600">Quick configuration of your school's structure, departments, and academic calendar in minutes.</p>
+          </div>
+          
+          <div class="reveal bg-white p-8 rounded-2xl border border-gray-200 text-center hover:border-teal-500 hover:shadow-lg transition-all">
+            <div style="width:64px;height:64px;background:#ccfbf1;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;">
+              <span class="material-symbols-outlined" style="color:#0d9488;font-size:36px;">database</span>
+            </div>
+            <h3 class="text-xl font-bold text-black mb-4">Data Migration</h3>
+            <p class="text-gray-600">Secure and seamless import of your existing student, staff, and financial records by our experts.</p>
+          </div>
+          
+          <div class="reveal bg-white p-8 rounded-2xl border border-gray-200 text-center hover:border-purple-500 hover:shadow-lg transition-all">
+            <div style="width:64px;height:64px;background:#f3e8ff;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;">
+              <span class="material-symbols-outlined" style="color:#a855f7;font-size:36px;">school</span>
+            </div>
+            <h3 class="text-xl font-bold text-black mb-4">Staff Training</h3>
+            <p class="text-gray-600">Personalized onboarding sessions for educators and admins to ensure everyone is confident.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Waitlist Section -->
+    <section class="w-full py-16 sm:py-24 px-4 sm:px-6 bg-white" id="waitlist">
+      <div class="max-w-3xl mx-auto">
+        <div class="reveal bg-gradient-to-br from-blue-50 to-purple-50 p-8 md:p-12 rounded-3xl border border-blue-200 shadow-lg">
+          <div class="text-center mb-10">
+            <h2 class="display-lg text-3xl sm:text-4xl font-bold text-black mb-3">Ready to Transform Your Institution?</h2>
+            <p class="text-lg sm:text-xl text-gray-600">Join the waitlist to get early access and exclusive onboarding support.</p>
+          </div>
+          
+          <form id="waitlist-form" onsubmit="submitWaitlist(event)" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-semibold text-black mb-2">Full Name *</label>
+                <input id="full-name" type="text" placeholder="John Doe" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"/>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-black mb-2">Institution Name *</label>
+                <input id="inst-name" type="text" placeholder="Ex: St. Xavier's Academy" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"/>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-semibold text-black mb-2">Professional Email *</label>
+                <input id="wl-email" type="email" placeholder="john@school.edu" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"/>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-black mb-2">Your Role</label>
+                <select id="role" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                  <option value="owner">Owner</option>
+                  <option value="admin">Admin</option>
+                  <option value="principal">Principal</option>
+                  <option value="teacher">Teacher</option>
+                </select>
+              </div>
+            </div>
+            
+            <button id="waitlist-btn" type="submit" class="shimmer-btn w-full bg-black text-white font-semibold py-4 rounded-lg shadow-lg hover:shadow-xl hover:opacity-90 active:scale-95 transition-all">Join the Waitlist</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+  
+  <!-- Footer -->
+  <footer class="w-full py-12 px-4 sm:px-6 bg-gray-900 text-white">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <div>
+          <div style="font-size:24px;font-weight:700;margin-bottom:12px;">EduAxis</div>
+          <p class="text-gray-400 text-sm">© 2024 EduAxis. Empowering education systems worldwide.</p>
+        </div>
+        <div class="flex justify-end md:gap-12">
+          <button onclick="openModal()" class="text-gray-400 hover:text-white transition-colors text-sm font-medium bg-transparent border-none cursor-pointer">Contact Us</button>
+        </div>
+      </div>
+      <div class="border-t border-gray-700 pt-8">
+        <p class="text-gray-400 text-xs text-center">Empowering the future of education</p>
+      </div>
+    </div>
+  </footer>
+  
+  <script>
+    // Modal Functions
+    function openModal() {
+      document.getElementById('contact-modal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeModal() {
+      document.getElementById('contact-modal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    
+    document.getElementById('contact-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'contact-modal') closeModal();
+    });
+    
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+    
+    // Mobile Menu
+    function toggleMenu() {
+      const menu = document.getElementById('mobile-menu');
+      menu.classList.toggle('open');
+    }
+    
+    // Close menu when link clicked
+    document.querySelectorAll('.mobile-nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        document.getElementById('mobile-menu').classList.remove('open');
+      });
+    });
+    
+    // Contact Form
+    async function sendContact(e) {
+      e.preventDefault();
+      const btn = document.getElementById('send-btn');
+      btn.disabled = true;
+      btn.innerHTML = 'Sending... <span class="material-symbols-outlined" style="font-size:18px;">hourglass_top</span>';
+      
+      try {
+        showToast('✓ Message sent successfully!', false);
+        document.getElementById('contact-form').reset();
+        setTimeout(closeModal, 1500);
+      } catch (err) {
+        showToast('✗ Failed to send message', true);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Send Message <span class="material-symbols-outlined" style="font-size:18px;">send</span>';
+      }
+    }
+    
+    // Waitlist Form
+    async function submitWaitlist(e) {
+      e.preventDefault();
+      const btn = document.getElementById('waitlist-btn');
+      const name = document.getElementById('full-name').value.trim();
+      const institution = document.getElementById('inst-name').value.trim();
+      const email = document.getElementById('wl-email').value.trim();
+      const role = document.getElementById('role').value;
+      
+      if (!name || !institution || !email) {
+        showToast('✗ Please fill all required fields', true);
+        return;
+      }
+      
+      btn.disabled = true;
+      btn.innerHTML = 'Joining... <span class="material-symbols-outlined" style="font-size:18px;">hourglass_top</span>';
+      
+      try {
+        showToast('✓ Successfully joined the waitlist!', false);
+        document.getElementById('waitlist-form').reset();
+      } catch (err) {
+        showToast('✗ Failed to join waitlist', true);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Join the Waitlist';
+      }
+    }
+    
+    // Toast Notification
+    function showToast(msg, isError) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.className = isError ? 'error show' : 'show';
+      setTimeout(() => toast.classList.remove('show'), 4000);
+    }
+    
+    // Scroll Reveal
+    const revealElements = () => {
+      document.querySelectorAll('.reveal').forEach(el => {
+        if (el.getBoundingClientRect().top < window.innerHeight - 100) {
+          el.classList.add('active');
+        }
+      });
+    };
+    
+    window.addEventListener('scroll', revealElements);
+    window.addEventListener('load', revealElements);
+    
+    // Navbar Shadow on Scroll
+    window.addEventListener('scroll', () => {
+      const navbar = document.getElementById('navbar');
+      if (window.scrollY > 20) {
+        navbar.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+      } else {
+        navbar.style.boxShadow = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
